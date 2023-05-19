@@ -1,13 +1,28 @@
 import puppeteer from 'puppeteer';
 import TelegramBot from 'node-telegram-bot-api';
 import * as dotenv from 'dotenv';
+import * as cron from 'node-cron';
 dotenv.config();
 
 const token = process.env.TOKEN;
 const bot = new TelegramBot(token, {polling: true});
 
-(async () => {
-  const browser = await puppeteer.launch({headless: 'new'});
+bot.onText(/\/iniciar/, async (msg) => {
+  const chatId = msg.chat.id;
+  bot.sendMessage(chatId, 'Pronto! Você verá os sabores disponíveis no site a cada hora.');
+  const firstData = await fetchData();
+  bot.sendMessage(chatId, firstData, {parse_mode: 'Markdown'});
+  cron.schedule('* */1 * * *', async () => {
+    const data = await fetchData();
+    bot.sendMessage(chatId, data, {parse_mode: 'Markdown'});
+  });
+
+});
+
+const fetchData = async () => {
+  const browser = await puppeteer.launch({
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
   const page = await browser.newPage();
 
   await page.goto('https://www.gsuplementos.com.br/whey-protein-concentrado-1kg-growth-supplements-p985936');
@@ -20,15 +35,14 @@ const bot = new TelegramBot(token, {polling: true});
   const available = originalList.filter(item => !item.includes('Indisponível'));
   const unavailable = originalList.filter(item => item.includes('Indisponível')).map(item => item.split(' ').shift());
 
-  const result = `Disponível:
-${available}
-Indisponível:
-${unavailable}`;
+  const result = `***Disponível:***
+${available.map((item, index) => `${index+1}. ${item}\n`).join('')}
+***Indisponível:***
+${unavailable.map((item, index) => `${index+1}. ${item}\n`).join('')}
 
-  bot.on('message', (msg) => {
-    const chatId = msg.chat.id;
-    bot.sendMessage(chatId, result);
-  });
+[Copmrar agora:](https://www.gsuplementos.com.br/whey-protein-concentrado-1kg-growth-supplements-p985936)`;
 
   await browser.close();
-})();
+
+  return result;
+};
