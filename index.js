@@ -7,7 +7,7 @@ dotenv.config();
 const token = process.env.TOKEN;
 const bot = new TelegramBot(token, {polling: true});
 
-bot.onText(/\/iniciar/, async (msg) => {
+bot.onText(/\/start/, async (msg) => {
   const chatId = msg.chat.id;
   bot.sendMessage(chatId, 'Pronto! Você verá os sabores disponíveis no site a cada hora.');
   const firstData = await fetchData();
