@@ -12,7 +12,7 @@ bot.onText(/\/iniciar/, async (msg) => {
   bot.sendMessage(chatId, 'Pronto! Você verá os sabores disponíveis no site a cada hora.');
   const firstData = await fetchData();
   bot.sendMessage(chatId, firstData, {parse_mode: 'Markdown'});
-  cron.schedule('* */1 * * *', async () => {
+  cron.schedule('0 */1 * * *', async () => {
     const data = await fetchData();
     bot.sendMessage(chatId, data, {parse_mode: 'Markdown'});
   });
@@ -21,6 +21,7 @@ bot.onText(/\/iniciar/, async (msg) => {
 
 const fetchData = async () => {
   const browser = await puppeteer.launch({
+    headless: 'new',
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
   const page = await browser.newPage();
@@ -33,7 +34,7 @@ const fetchData = async () => {
   originalList.shift();
 
   const available = originalList.filter(item => !item.includes('Indisponível'));
-  const unavailable = originalList.filter(item => item.includes('Indisponível')).map(item => item.split(' ').shift());
+  const unavailable = originalList.filter(item => item.includes('Indisponível')).map(item => item.split(' ').slice(0, -1).join(' '));
 
   const result = `***Disponível:***
 ${available.map((item, index) => `${index+1}. ${item}\n`).join('')}
