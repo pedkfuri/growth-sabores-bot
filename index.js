@@ -11,10 +11,10 @@ bot.onText(/\/start/, async (msg) => {
   const chatId = msg.chat.id;
   bot.sendMessage(chatId, 'Pronto! Você verá os sabores disponíveis no site a cada hora.');
   const firstData = await fetchData();
-  bot.sendMessage(chatId, firstData, {parse_mode: 'Markdown'});
+  await bot.sendMessage(chatId, firstData, {parse_mode: 'Markdown'});
   cron.schedule('0 */1 * * *', async () => {
     const data = await fetchData();
-    bot.sendMessage(chatId, data, {parse_mode: 'Markdown'});
+    await bot.sendMessage(chatId, data, {parse_mode: 'Markdown'});
   });
 
 });
