@@ -41,8 +41,9 @@ ${available.map((item, index) => `${index+1}. ${item}\n`).join('')}
 ***Indisponível:***
 ${unavailable.map((item, index) => `${index+1}. ${item}\n`).join('')}
 
-[Copmrar agora:](https://www.gsuplementos.com.br/whey-protein-concentrado-1kg-growth-supplements-p985936)`;
+[Comprar agora:](https://www.gsuplementos.com.br/whey-protein-concentrado-1kg-growth-supplements-p985936)`;
 
+  await page.close();
   await browser.close();
 
   return result;
